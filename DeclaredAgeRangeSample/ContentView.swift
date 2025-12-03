@@ -1,3 +1,10 @@
+//
+//  ContentView.swift
+//  DeclaredAgeRangeSample
+//
+//  A sample app demonstrating the Declared Age Range API (iOS 26+)
+//
+
 import SwiftUI
 import DeclaredAgeRange
 
@@ -14,25 +21,25 @@ struct ContentView: View {
             VStack(spacing: 32) {
                 Spacer()
                 
-                // アイコン
+                // Icon
                 Image(systemName: "person.crop.circle.badge.clock")
                     .font(.system(size: 80))
                     .foregroundStyle(.blue)
                 
-                // 説明テキスト
+                // Description
                 Text("Declared Age Range API")
                     .font(.title)
                     .fontWeight(.bold)
                 
-                Text("Apple IDで申告された年齢範囲を取得します")
+                Text("Request the declared age range from Apple ID")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
                 
-                // 結果表示エリア
+                // Result display area
                 if isLoading {
-                    ProgressView("取得中...")
+                    ProgressView("Requesting...")
                         .padding()
                 } else if let ageRange {
                     ageRangeView(ageRange)
@@ -44,11 +51,11 @@ struct ContentView: View {
                 
                 Spacer()
                 
-                // 取得ボタン
+                // Request button
                 Button {
                     fetchAgeRange()
                 } label: {
-                    Label("年齢範囲を取得", systemImage: "arrow.down.circle.fill")
+                    Label("Request Age Range", systemImage: "arrow.down.circle.fill")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -65,11 +72,12 @@ struct ContentView: View {
         }
     }
     
-    // 年齢範囲の表示
+    // MARK: - Result Views
+    
     @ViewBuilder
     private func ageRangeView(_ range: AgeRangeService.AgeRange) -> some View {
         VStack(spacing: 16) {
-            Text("取得した年齢範囲")
+            Text("Age Range Result")
                 .font(.headline)
                 .foregroundStyle(.secondary)
             
@@ -85,7 +93,7 @@ struct ContentView: View {
                 }
                 
                 if let declaration = range.ageRangeDeclaration {
-                    Text("申告方法: \(declarationDescription(declaration))")
+                    Text("Declaration: \(declarationDescription(declaration))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -97,7 +105,6 @@ struct ContentView: View {
         .padding()
     }
     
-    // 拒否された場合の表示
     @ViewBuilder
     private func declinedView() -> some View {
         VStack(spacing: 12) {
@@ -105,7 +112,7 @@ struct ContentView: View {
                 .font(.title)
                 .foregroundStyle(.gray)
             
-            Text("年齢範囲の共有が拒否されました")
+            Text("User declined to share age range")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
@@ -115,7 +122,6 @@ struct ContentView: View {
         .padding(.horizontal)
     }
     
-    // エラー表示
     @ViewBuilder
     private func errorView(_ message: String) -> some View {
         VStack(spacing: 12) {
@@ -134,7 +140,8 @@ struct ContentView: View {
         .padding(.horizontal)
     }
     
-    // 年齢範囲を取得
+    // MARK: - Actions
+    
     private func fetchAgeRange() {
         isLoading = true
         errorMessage = nil
@@ -143,7 +150,7 @@ struct ContentView: View {
         
         Task {
             do {
-                // 13歳、16歳、18歳をAge Gateとして設定
+                // Request age range with age gates at 13, 16, and 18
                 let response = try await requestAgeRange(ageGates: 13, 16, 18)
                 
                 await MainActor.run {
@@ -153,53 +160,53 @@ struct ContentView: View {
                     case .sharing(let range):
                         self.ageRange = range
                     @unknown default:
-                        <#fatalError()#>
+                        self.errorMessage = "Unknown response received"
                     }
                     self.isLoading = false
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "年齢範囲の取得に失敗しました: \(error.localizedDescription)"
+                    self.errorMessage = "Failed to request age range: \(error.localizedDescription)"
                     self.isLoading = false
                 }
             }
         }
     }
     
-    // 年齢範囲の説明文字列
+    // MARK: - Helpers
+    
     private func ageRangeDescription(_ range: AgeRangeService.AgeRange) -> String {
         if let lower = range.lowerBound, let upper = range.upperBound {
-            return "\(lower)歳〜\(upper)歳未満"
+            return "\(lower) - \(upper) years old"
         } else if let lower = range.lowerBound {
-            return "\(lower)歳以上"
+            return "\(lower)+ years old"
         } else if let upper = range.upperBound {
-            return "\(upper)歳未満"
+            return "Under \(upper) years old"
         } else {
-            return "不明"
+            return "Unknown"
         }
     }
     
-    // 申告方法の説明
     private func declarationDescription(_ declaration: AgeRangeService.AgeRangeDeclaration) -> String {
         switch declaration {
         case .selfDeclared:
-            return "本人申告"
+            return "Self-declared"
         case .guardianDeclared:
-            return "保護者申告"
+            return "Guardian-declared"
         case .checkedByOtherMethod:
-            return "その他の方法で確認"
+            return "Verified by other method"
         case .guardianCheckedByOtherMethod:
-            return "保護者がその他の方法で確認"
+            return "Guardian verified by other method"
         case .governmentIDChecked:
-            return "政府ID確認"
+            return "Government ID verified"
         case .guardianGovernmentIDChecked:
-            return "保護者が政府ID確認"
+            return "Guardian verified with Government ID"
         case .paymentChecked:
-            return "支払い方法で確認"
+            return "Payment method verified"
         case .guardianPaymentChecked:
-            return "保護者が支払い方法で確認"
+            return "Guardian verified with payment method"
         @unknown default:
-            return "不明"
+            return "Unknown"
         }
     }
 }

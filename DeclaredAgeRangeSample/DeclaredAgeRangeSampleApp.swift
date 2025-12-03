@@ -2,7 +2,7 @@
 //  DeclaredAgeRangeSampleApp.swift
 //  DeclaredAgeRangeSample
 //
-//  Created by 熊本和正 on 2025/12/03.
+//  A sample app demonstrating the Declared Age Range API (iOS 26+)
 //
 
 import SwiftUI
