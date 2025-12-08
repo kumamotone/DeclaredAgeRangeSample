@@ -2,6 +2,8 @@
 
 A sample iOS app demonstrating Apple's [Declared Age Range API](https://developer.apple.com/documentation/declaredagerange).
 
+<img src="screenshot.png" width="300">
+
 ## Requirements
 
 - iOS 26.2 beta / iPadOS 26.2 beta or later
